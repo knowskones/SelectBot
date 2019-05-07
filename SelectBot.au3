@@ -736,8 +736,7 @@ Func GUI_AutoStart()
 				ExitLoop
 
 			Case $hBtn_Add
-				CreateAutostartShortcut()
-				$sBotFileName, $hSC
+				Local $sBotFileName, $hSC
 				$Lstbx_Sel = _GUICtrlListView_GetSelectedIndices($g_hListview_Main, True)
 				If $Lstbx_Sel[0] > 0 Then
 					For $i = 1 To $Lstbx_Sel[0]
