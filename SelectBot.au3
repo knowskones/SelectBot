@@ -736,21 +736,26 @@ Func GUI_AutoStart()
 				ExitLoop
 
 			Case $hBtn_Add
-
+				CreateAutostartShortcut()
+				$sBotFileName, $hSC
 				$Lstbx_Sel = _GUICtrlListView_GetSelectedIndices($g_hListview_Main, True)
 				If $Lstbx_Sel[0] > 0 Then
 					For $i = 1 To $Lstbx_Sel[0]
 						$sLstbx_SelItem = _GUICtrlListView_GetItemText($g_hListview_Main, $Lstbx_Sel[$i])
 						If $sLstbx_SelItem <> "" Then
 							ReadIni($sLstbx_SelItem)
-							If FileExists($g_sIniDir & "\" & $g_sBotFile) = 1 Then
-								$g_sBotFile = $g_sBotFile
-							ElseIf FileExists($g_sIniDir & "\" & $g_sBotFileAU3) = 1 Then
-								$g_sBotFile = $g_sBotFileAU3
+							Local $sEmulator = $g_sIniEmulator
+							If $g_sIniEmulator = "BlueStacks3" Then $sEmulator = "BlueStacks2"
+							$aParameters = StringSplit($g_sIniParameters, "")
+							Local $sSpecialParameter = $aParameters[1] = 1 ? " /nowatchdog" : "" & $aParameters[2] = 1 ? " /dock1" : "" & $aParameters[3] = 1 ? " /dock2" : "" & $aParameters[4] = 1 ? " /dpiaware" : "" & $aParameters[5] = 1 ? " /debug" : "" & $aParameters[6] = 1 ? " /minigui" : "" & $aParameters[7] = 1 ? " /hideandroid" : ""
+							If FileExists($g_sIniDir & "\" & $g_sBotFile) Then
+								$sBotFileName = $g_sBotFile
+							ElseIf FileExists($g_sIniDir & "\" & $g_sBotFileAU3) Then
+								$sBotFileName = $g_sBotFileAU3
+							Else
+								MsgBox($MB_OK, "No Bot found", "Couldn't find any Bot in the Directory, please check if you have the mybot.run.exe or the mybot.run.au3 in the Dir and if you selected the right Dir!", 0, $g_hGui_Main)
 							EndIf
-
-							FileCreateShortcut($g_sIniDir & "\" & $g_sBotFile, @StartupDir & "\MyBot -" & $g_sIniProfile & ".lnk", $g_sIniDir, $g_sIniProfile & " " & $g_sIniEmulator = "BlueStacks3" ? "BlueStacks2" : $g_sIniEmulator & " " & $g_sIniInstance, "Shortcut for Bot Profile:" & $g_sIniProfile)
-
+							$hSC = FileCreateShortcut($g_sIniDir & "\" & $sBotFileName, @StartupDir & "\MyBot -" & $g_sIniProfile & ".lnk", $g_sIniDir, $g_sIniProfile & " " & $sEmulator & " " & $g_sIniInstance & $sSpecialParameter, "Shortcut for Bot Profile:" & $g_sIniProfile)
 							UpdateList_AS()
 							If FileExists(@StartupDir & "\MyBot -" & $g_sIniProfile & ".lnk") = 0 Then
 								GUICtrlSetState($hBtn_Remove, $GUI_DISABLE)
@@ -760,9 +765,9 @@ Func GUI_AutoStart()
 								GUICtrlSetState($hBtn_Add, $GUI_DISABLE)
 							EndIf
 						EndIf
+
 					Next
 				EndIf
-
 
 
 			Case $hBtn_Remove
